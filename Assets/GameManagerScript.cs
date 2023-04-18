@@ -9,16 +9,6 @@ public class GameManagerScript : MonoBehaviour
     void Start()
     {
         map = new int[] { 0, 0, 0, 1, 0, 2, 0, 0, 0, 0 };
-        // 追加、文字列の宣言と初期化
-        /* string debugText = "";
-         // Debug.Log("Hello World");
-         for (int i = 0; i < map.Length; i++)
-         {
-             // 変更、文字列に結合していく
-             debugText += map[i].ToString() + ",";
-         }
-         // 結合した文字列を出力
-         Debug.Log(debugText);*/
         PrintArray();
     }
 
@@ -27,50 +17,14 @@ public class GameManagerScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            // 1. をここから記述
-            // 見つからなかった時のために-1で初期化
             int playerIndex = GetPlayerIndex();
-            // 要素数はmap.Lengthで取得
-            /*   for (int i = 0; i < map.Length; i++)
-               {
-                   if (map[i] == 1)
-                   {
-                       playerIndex = i;
-                       break;
-                   }
-               }*/
-            // 都築2. 3.を記述していく
             MoveNumber(1, playerIndex, playerIndex + 1);
-            /* if (playerIndex < map.Length - 1)
-             {
-                 map[playerIndex + 1] = 1;
-                 map[playerIndex] = 0;
-             }*/
-
             PrintArray();
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            // 1. をここから記述
-            // 見つからなかった時のために-1で初期化
             int playerIndex = GetPlayerIndex();
-            // 要素数はmap.Lengthで取得
-            /*for (int i = 0; i < map.Length; i++)
-            {
-                if (map[i] == 1)
-                {
-                    playerIndex = i;
-                    break;
-                }
-            }*/
-            // 都築2. 3.を記述していく
             MoveNumber(1, playerIndex, playerIndex - 1);
-            /* if (playerIndex > 0)
-             {
-                 map[playerIndex - 1] = 1;
-                 map[playerIndex] = 0;
-             }*/
-
             PrintArray();
         }
     }
@@ -78,16 +32,20 @@ public class GameManagerScript : MonoBehaviour
     // クラスの中、メソッドの外に置くことに注意
     void PrintArray()
     {
+        // 追加、文字列の宣言と初期化
         string debugText = "";
         for (int i = 0; i < map.Length; i++)
         {
+            // 変更、文字列に結合していく
             debugText += map[i].ToString() + ",";
         }
+        // 結合した文字列を出力
         Debug.Log(debugText);
     }
 
     int GetPlayerIndex()
     {
+        // 要素数はmap.Lengthで取得
         for (int i = 0; i < map.Length; i++)
         {
             if (map[i] == 1)
@@ -95,6 +53,7 @@ public class GameManagerScript : MonoBehaviour
                 return i;
             }
         }
+        // 見つからなかった時のために-1で初期化
         return -1;
     }
 
@@ -114,11 +73,6 @@ public class GameManagerScript : MonoBehaviour
             // もし箱が移動失敗したら、プレイヤーの移動も失敗
             if (!success) { return false; }
         }
-
-        /* if (moveTo < 0 || moveTo >= map.Length)
-         {
-             return false;
-         }*/
         // プレイヤー・箱関わらずの移動処理
         map[moveTo] = number;
         map[moveFrom] = 0;
