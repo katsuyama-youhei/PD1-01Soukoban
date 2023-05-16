@@ -8,6 +8,8 @@ public class GameManagerScript : MonoBehaviour
     public GameObject boxPrefab;
     public GameObject clearPrefab;
     public GameObject clearText;
+    public GameObject particlePrehub;
+    public GameObject wallPrefab;
 
     int[,] map;
     GameObject[,] field;
@@ -23,13 +25,18 @@ public class GameManagerScript : MonoBehaviour
             );
         */
 
+        Screen.SetResolution(1920, 1080, false);
+
         map = new int[,] {
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 2, 3, 2, 0, 0 },
-            { 0, 0, 0, 2, 0, 0, 0 },
-            { 0, 0, 3, 0, 3, 0, 0 },
-            { 0, 0, 0, 0, 1, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
+            { 4, 4, 4, 4, 4, 4, 4, 4, 4 },
+            { 4, 0, 0, 0, 0, 0, 0, 0, 4 },
+            { 4, 0, 0, 3, 0, 0, 0, 0, 4 },
+            { 4, 0, 3, 2, 0, 0, 0, 0, 4 },
+            { 4, 0, 2, 1, 3, 0, 0, 0, 4 },
+            { 4, 0, 0, 0, 2, 0, 0, 0, 4 },
+            { 4, 0, 0, 0, 0, 0, 0, 0, 4 },
+            { 4, 0, 0, 0, 0, 0, 0, 0, 4 },
+            { 4, 4, 4, 4, 4, 4, 4, 4, 4 },
         };
         field = new GameObject
             [
@@ -51,7 +58,7 @@ public class GameManagerScript : MonoBehaviour
                         Quaternion.identity
                         );
                 }
-                if (map[y, x] == 2)
+                else if (map[y, x] == 2)
                 {
                     field[y, x] = Instantiate(
                      boxPrefab,
@@ -59,13 +66,21 @@ public class GameManagerScript : MonoBehaviour
                      Quaternion.identity
                      );
                 }
-                if (map[y, x] == 3)
+                else if (map[y, x] == 3)
                 {
                     field[y, x] = Instantiate(
                     clearPrefab,
                     new Vector3(x, map.GetLength(0) - y, 0.01f),
                     Quaternion.identity
                     );
+                }
+                else if (map[y, x] == 4)
+                {
+                    field[y, x] = Instantiate(
+                   wallPrefab,
+                   new Vector3(x, map.GetLength(0) - y, 0),
+                   Quaternion.identity
+                   );
                 }
                 //   debugText += map[y, x].ToString() + ",";
             }
@@ -83,6 +98,11 @@ public class GameManagerScript : MonoBehaviour
             Vector2Int asa = new Vector2Int(1, 0);
             Vector2Int tototo = playerIndex + asa;
             MoveNumber("Player", playerIndex, tototo);
+            for (int i = 0; i < 5; i++)
+            {
+                Vector3 pos = new Vector3(playerIndex.x, map.GetLength(0) - playerIndex.y, 0);
+                Instantiate(particlePrehub, pos, Quaternion.identity);
+            }
             //PrintArray();
 
         }
@@ -92,6 +112,11 @@ public class GameManagerScript : MonoBehaviour
             Vector2Int asa = new Vector2Int(1, 0);
             Vector2Int tototo = playerIndex - asa;
             MoveNumber("Player", playerIndex, tototo);
+            for (int i = 0; i < 5; i++)
+            {
+                Vector3 pos = new Vector3(playerIndex.x, map.GetLength(0) - playerIndex.y, 0);
+                Instantiate(particlePrehub, pos, Quaternion.identity);
+            }
             //PrintArray();
         }
 
@@ -101,18 +126,38 @@ public class GameManagerScript : MonoBehaviour
             Vector2Int asa = new Vector2Int(0, 1);
             Vector2Int tototo = playerIndex - asa;
             MoveNumber("Player", playerIndex, tototo);
-        }else if (Input.GetKeyDown(KeyCode.DownArrow))
+            for (int i = 0; i < 5; i++)
+            {
+                Vector3 pos = new Vector3(playerIndex.x, map.GetLength(0) - playerIndex.y, 0);
+                Instantiate(particlePrehub, pos, Quaternion.identity);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             Vector2Int playerIndex = GetPlayerIndex();
             Vector2Int asa = new Vector2Int(0, 1);
             Vector2Int tototo = playerIndex + asa;
             MoveNumber("Player", playerIndex, tototo);
+            for (int i = 0; i < 5; i++)
+            {
+                Vector3 pos = new Vector3(playerIndex.x, map.GetLength(0) - playerIndex.y, 0);
+                Instantiate(particlePrehub, pos, Quaternion.identity);
+            }
         }
 
         if (IsCleard())
         {
             clearText.SetActive(true);
         }
+
+        if (clearText)
+        {
+            if (!IsCleard())
+            {
+                clearText.SetActive(false);
+            }
+        }
+        Particle.particle.Update();
     }
 
     // クラスの中、メソッドの外に置くことに注意
@@ -156,6 +201,11 @@ public class GameManagerScript : MonoBehaviour
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Wall")
+        {
+            return false;
+        }
+
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
@@ -190,9 +240,9 @@ public class GameManagerScript : MonoBehaviour
     {
         List<Vector2Int> goals = new List<Vector2Int>();
 
-        for(int y = 0; y < map.GetLength(0); y++)
+        for (int y = 0; y < map.GetLength(0); y++)
         {
-            for(int x = 0; x < map.GetLength(1); x++)
+            for (int x = 0; x < map.GetLength(1); x++)
             {
                 if (map[y, x] == 3)
                 {
@@ -201,7 +251,7 @@ public class GameManagerScript : MonoBehaviour
             }
         }
 
-        for(int i = 0; i < goals.Count; i++)
+        for (int i = 0; i < goals.Count; i++)
         {
             GameObject f = field[goals[i].y, goals[i].x];
             if (f == null || f.tag != "Box")
@@ -211,5 +261,6 @@ public class GameManagerScript : MonoBehaviour
         }
         return true;
     }
+
 }
 
